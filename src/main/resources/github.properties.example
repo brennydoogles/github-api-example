@@ -1,0 +1,17 @@
+## Authorization Type ##
+# Valid values are "token" and "password"
+auth_type=token
+
+## Access Token ##
+# Only needed if auth_type=token #
+# Can be generated at https://github.com/settings/tokens #
+access_token=YOUR_ACCESS_TOKEN
+
+## Github Credentials ##
+# Only needed if auth_type=password #
+username=YOUR_USERNAME
+password=YOUR_PASSWORD
+
+## Repository to Validate ##
+repository_owner=REPOSITORY_OWNER
+repository_name=REPOSITORY_NAME
