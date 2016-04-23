@@ -2,11 +2,14 @@ package com.brendondugan.github_api_example.github;
 
 import com.google.common.base.Strings;
 import org.eclipse.egit.github.core.Repository;
+import org.eclipse.egit.github.core.RepositoryBranch;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
 import javax.naming.AuthenticationException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by brendon on 4/22/2016.
@@ -36,7 +39,15 @@ public class RepositoryValidityValidator {
         this.authenticationType = GithubAuthenticationType.CREDENTIALS;
     }
 
-    public Repository checkConnection() throws AuthenticationException, IOException {
+    public void setGitHubClient(GitHubClient gitHubClient) {
+        this.gitHubClient = gitHubClient;
+    }
+
+    public void setRepositoryService(RepositoryService repositoryService) {
+        this.repositoryService = repositoryService;
+    }
+
+    private Repository getRepository() throws AuthenticationException, IOException {
         if(this.gitHubClient == null || this. repositoryService == null){
             if(
                     this.authenticationType == null ||
@@ -65,5 +76,15 @@ public class RepositoryValidityValidator {
         }
         Repository repository = this.repositoryService.getRepository(this.repositoryOwner, this.repositoryName);
         return repository;
+    }
+
+    public List<String> getBranches() throws IOException, AuthenticationException {
+        List<String> branches = new ArrayList<String>();
+        Repository repository = this.getRepository();
+        List<RepositoryBranch> branchList = repositoryService.getBranches(repository);
+        for (RepositoryBranch branch : branchList){
+            branches.add(branch.getName());
+        }
+        return branches;
     }
 }

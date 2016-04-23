@@ -2,12 +2,8 @@ package com.brendondugan.github_api_example;
 
 import com.brendondugan.github_api_example.github.RepositoryValidityValidator;
 import org.eclipse.egit.github.core.Repository;
-import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.service.RepositoryService;
 
 import javax.naming.AuthenticationException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -44,7 +40,7 @@ public class Application {
 
     public static void main(String[] args) {
         Properties properties = null;
-        RepositoryValidityValidator validator = null;
+        RepositoryValidityValidator validator;
         try {
             properties = Application.loadProperties();
         }
@@ -54,11 +50,12 @@ public class Application {
         }
         validator = Application.getValidator(properties);
         try {
-            Repository repository = validator.checkConnection();
-            System.out.println(repository.getCloneUrl());
-        } catch (AuthenticationException e) {
-            e.printStackTrace();
+            for(String branch : validator.getBranches()){
+                System.out.println(branch);
+            }
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (AuthenticationException e) {
             e.printStackTrace();
         }
 
