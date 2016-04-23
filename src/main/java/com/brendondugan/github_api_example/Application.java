@@ -49,15 +49,24 @@ public class Application {
             System.exit(1);
         }
         validator = Application.getValidator(properties);
+        String file_to_check = properties.getProperty("file_to_check");
         try {
+            System.out.println("Branches:");
             for(String branch : validator.getBranches()){
-                System.out.println(branch);
+                System.out.println("\t" + branch);
+            }
+            System.out.println("Tags:");
+            for (String tag : validator.getTags()){
+                System.out.println("\t" + tag);
+            }
+            System.out.println(String.format("Branches without %s:", file_to_check));
+            for(String branch : validator.checkBranchesForMissingFile(file_to_check)){
+                System.out.println("\t" + branch);
             }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (AuthenticationException e) {
             e.printStackTrace();
         }
-
     }
 }

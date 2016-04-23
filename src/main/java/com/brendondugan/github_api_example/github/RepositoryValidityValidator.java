@@ -1,9 +1,10 @@
 package com.brendondugan.github_api_example.github;
 
 import com.google.common.base.Strings;
-import org.eclipse.egit.github.core.Repository;
-import org.eclipse.egit.github.core.RepositoryBranch;
+import org.eclipse.egit.github.core.*;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.ContentsService;
+import org.eclipse.egit.github.core.service.DataService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
 import javax.naming.AuthenticationException;
@@ -23,6 +24,8 @@ public class RepositoryValidityValidator {
     private GithubAuthenticationType authenticationType;
     private GitHubClient gitHubClient = null;
     private RepositoryService repositoryService = null;
+    private ContentsService contentsService = null;
+    private DataService dataService = null;
 
     public RepositoryValidityValidator(String repositoryOwner, String repositoryName, String accessToken) {
         this.repositoryOwner = repositoryOwner;
@@ -47,8 +50,16 @@ public class RepositoryValidityValidator {
         this.repositoryService = repositoryService;
     }
 
+    public void setContentsService(ContentsService contentsService) {
+        this.contentsService = contentsService;
+    }
+
+    public void setDataService(DataService dataService) {
+        this.dataService = dataService;
+    }
+
     private Repository getRepository() throws AuthenticationException, IOException {
-        if(this.gitHubClient == null || this. repositoryService == null){
+        if(this.gitHubClient == null || this.repositoryService == null || this.contentsService == null || this.dataService == null){
             if(
                     this.authenticationType == null ||
                     (
@@ -72,6 +83,8 @@ public class RepositoryValidityValidator {
                         this.gitHubClient.setCredentials(this.username, this.password);
                 }
                 this.repositoryService = new RepositoryService(this.gitHubClient);
+                this.contentsService = new ContentsService(this.gitHubClient);
+                this.dataService = new DataService(this.gitHubClient);
             }
         }
         Repository repository = this.repositoryService.getRepository(this.repositoryOwner, this.repositoryName);
@@ -81,9 +94,40 @@ public class RepositoryValidityValidator {
     public List<String> getBranches() throws IOException, AuthenticationException {
         List<String> branches = new ArrayList<String>();
         Repository repository = this.getRepository();
-        List<RepositoryBranch> branchList = repositoryService.getBranches(repository);
-        for (RepositoryBranch branch : branchList){
+        List<RepositoryBranch> repositoryBranches = repositoryService.getBranches(repository);
+        for (RepositoryBranch branch : repositoryBranches){
             branches.add(branch.getName());
+        }
+        return branches;
+    }
+
+    public List<String> getTags() throws IOException, AuthenticationException {
+        List<String> tags = new ArrayList<String>();
+        Repository repository = this.getRepository();
+        List<RepositoryTag> repositoryTags = repositoryService.getTags(repository);
+        for(RepositoryTag tag : repositoryTags){
+            tags.add(tag.getName());
+        }
+        return tags;
+    }
+
+    public List<String> checkBranchesForMissingFile(String filename) throws IOException, AuthenticationException {
+        List<String> branches = new ArrayList<String>();
+        Repository repository = this.getRepository();
+        List<RepositoryBranch> repositoryBranches = repositoryService.getBranches(repository);
+        for(RepositoryBranch branch : repositoryBranches){
+            boolean fileFound = false;
+            Reference dataServiceReference = dataService.getReference(repository, "heads/" + branch.getName());
+            Commit commit = dataService.getCommit(repository, dataServiceReference.getObject().getSha());
+            Tree tree = dataService.getTree(repository, commit.getSha());
+            for (TreeEntry entry : tree.getTree()){
+                if(filename.equals(entry.getPath())){
+                    fileFound = true;
+                }
+            }
+            if(!fileFound){
+                branches.add(branch.getName());
+            }
         }
         return branches;
     }

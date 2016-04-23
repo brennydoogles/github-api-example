@@ -2,6 +2,8 @@ package com.brendondugan.github_api_example.github;
 
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.ContentsService;
+import org.eclipse.egit.github.core.service.DataService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.junit.After;
 import org.junit.Before;
@@ -21,6 +23,11 @@ public class RepositoryValidityValidatorTest {
     private GitHubClient client = mock(GitHubClient.class);
     @Mock
     private RepositoryService repositoryService = mock(RepositoryService.class);
+    @Mock
+    private ContentsService contentsService = mock(ContentsService.class);
+    @Mock
+    private DataService dataService = mock(DataService.class);
+
     private RepositoryValidityValidator validator;
 
     @Before
@@ -28,6 +35,8 @@ public class RepositoryValidityValidatorTest {
         this.validator = new RepositoryValidityValidator("test", "test", "test");
         this.validator.setGitHubClient(client);
         this.validator.setRepositoryService(repositoryService);
+        this.validator.setContentsService(contentsService);
+        this.validator.setDataService(dataService);
     }
 
     @After
