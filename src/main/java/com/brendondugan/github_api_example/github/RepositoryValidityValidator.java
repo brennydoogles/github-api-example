@@ -131,4 +131,25 @@ public class RepositoryValidityValidator {
         }
         return branches;
     }
+
+    public List<String> checkTagsForMissingFile(String filename) throws IOException, AuthenticationException {
+        List<String> tags = new ArrayList<String>();
+        Repository repository = this.getRepository();
+        List<RepositoryTag> repositoryTags = repositoryService.getTags(repository);
+        for(RepositoryTag tag : repositoryTags){
+            boolean fileFound = false;
+            Reference dataServiceReference = dataService.getReference(repository, "tags/" + tag.getName());
+            Commit commit = dataService.getCommit(repository, dataServiceReference.getObject().getSha());
+            Tree tree = dataService.getTree(repository, commit.getSha());
+            for (TreeEntry entry : tree.getTree()){
+                if(filename.equals(entry.getPath())){
+                    fileFound = true;
+                }
+            }
+            if(!fileFound){
+                tags.add(tag.getName());
+            }
+        }
+        return tags;
+    }
 }
